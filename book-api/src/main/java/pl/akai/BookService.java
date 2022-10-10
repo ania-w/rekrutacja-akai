@@ -12,11 +12,14 @@ import java.util.stream.Collectors;
 
 public class BookService {
 
-    private static final String API_URI="https://akai-recruitment.herokuapp.com/book";
-    private static List<Book> books=new ArrayList<>();
-    private static List<Author> authors=new ArrayList<>();
+    private final String API_URI;
+    private List<Book> books;
 
-    public static List<Book> getBooks(){
+    public BookService(String API_URI) {
+        this.API_URI = API_URI;
+    }
+
+    public List<Book> getBooks(){
         var httpClient= HttpClient.newHttpClient();
 
         var request = HttpRequest.newBuilder(
@@ -25,37 +28,46 @@ public class BookService {
                 .GET()
                 .build();
 
+        books=new ArrayList<>();
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
-            books = new ObjectMapper().readValue(response, new TypeReference<>(){});
+            books = new ObjectMapper().readValue(response, new TypeReference<List<Book>>(){});
         } catch (Exception e){
             throw new RuntimeException(":(");
         }
 
-        updateAuthors();
-
         return Collections.unmodifiableList(books);
     }
 
-    public static List<Author> getAuthors(){
-        return Collections.unmodifiableList(authors);
+    public void printBooks(){
+
+        if(books==null) getBooks();
+
+        books.forEach(System.out::println);
     }
 
-    public static void printBestAuthors(){
-        authors.stream()
-                .map(Author::getRating)
-                .sorted(Comparator.reverseOrder())
+    public void printBestAuthors(){
+
+        if(books==null) getBooks();
+
+        getAuthors().stream()
+                .sorted(Comparator.comparing(Author::getRating).reversed())
                 .limit(3)
+                .map(author->new StringBuilder().append(author.getName()).append(" ").append(author.getRating()))
                 .forEach(System.out::println);
     }
 
-    private static void updateAuthors(){
+    public List<Author> getAuthors(){
+        List<Author> authors=new ArrayList<>();
+        books.stream().map(Book::getAuthor).collect(Collectors.toSet())
+                .forEach(name->authors.add(new Author(name)));
 
-        Set<String> names=books.stream().map(Book::getAuthor).collect(Collectors.toSet());
-        names.forEach(name->authors.add(new Author(name)));
+        books.forEach(book->
+                authors.stream().filter(a->a.getName().equals(book.getAuthor()))
+                        .findFirst().get().addBook(book));
 
-        for(var book : books)
-            authors.stream().filter(a->a.getName().equals(book.getAuthor())).findFirst().get().getBooks().add(book);
+
+        return Collections.unmodifiableList(authors);
     }
 
 }

@@ -1,7 +1,7 @@
 package pl.akai;
 
 public class Book {
-    private int id;
+    private String id;
     private String title;
     private String author;
     private Double rating;
@@ -9,18 +9,18 @@ public class Book {
     public Book() {
     }
 
-    public Book(int id, String title, String author, Double rating) {
+    public Book(String id, String title, String author, Double rating) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.rating = rating;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -46,5 +46,14 @@ public class Book {
 
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+
+    @Override
+    public String toString() {
+        return "Book: " +
+                "id= " + id +
+                ", title= " + title  +
+                ", author= " + author  +
+                ", rating= " + rating;
     }
 }

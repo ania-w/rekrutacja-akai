@@ -6,14 +6,13 @@ public class Main {
 
     public static void main(String[] args) {
 
-        List<Book> books=BookService.getBooks();
-        System.out.println(books);
+        BookService bookService=new BookService("https://akai-recruitment.herokuapp.com/book");
 
-        List<Author> authors=BookService.getAuthors();
-        System.out.println(authors);
+        bookService.printBooks();
 
-        BookService.printBestAuthors();
+        System.out.println("\n");
 
+        bookService.printBestAuthors();
     }
 
 
